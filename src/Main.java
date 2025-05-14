@@ -7,10 +7,6 @@ import java.util.ArrayList;
 // then press Enter. You can now see whitespace characters in your code.
 public class Main {
     public static void main(String[] args) {
-        BaseDatos bd = new BaseDatos();
         VentanaPrincipal ventanaPrincipal = new VentanaPrincipal();
-       ArrayList<String> array = bd.actualizarDatos();
-       for (String s : array)
-           System.out.println(s);
     }
 }

@@ -1,47 +1,48 @@
 package Persistencia;
 
 import java.sql.*;
-import java.text.DateFormat;
+import java.text.ParseException;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+
+/**
+ * Clase de base datos (persistencia)
+ * @version 2.0
+ * @author Pablo Armas Bossé
+ */
 
 public class BaseDatos {
-    public BaseDatos() {
-        try {
-            Connection c = DriverManager.getConnection("jdbc:mariadb://localhost:3306/", "root", "");
-            Statement stmt = c.createStatement();
-            stmt.execute("create database if not exists pruebaFechasProg");
-            c = DriverManager.getConnection("jdbc:mariadb://localhost:3306/pruebaFechasProg", "root", "");
-            stmt = c.createStatement();
-            stmt.execute("create table if not exists fechas(fecha date)");
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    public BaseDatos() throws SQLException {
+            inicializarBD();
     }
 
-    public void insertarFecha(String stringFecha) {
+    public void insertarFecha(String stringFecha) throws SQLException, ParseException {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate fecha = LocalDate.parse(stringFecha, formatter);
+       /* Period anios = Period.between(fecha, LocalDate.now());
+        System.out.println(anios.getYears());*/ //obtener los años
         Connection c;
-        try {
             c = DriverManager.getConnection("jdbc:mariadb://localhost:3306/pruebaFechasProg", "root", "");
             PreparedStatement preparedStatement = c.prepareStatement("insert into fechas values(?)");
             preparedStatement.setDate(1, java.sql.Date.valueOf(fecha));
             preparedStatement.execute();
 
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    }
+    public void inicializarBD () throws SQLException {
+        Connection c = DriverManager.getConnection("jdbc:mariadb://localhost:3306/", "root", "");
+        Statement stmt = c.createStatement();
+        stmt.execute("create database if not exists pruebaFechasProg");
+        c = DriverManager.getConnection("jdbc:mariadb://localhost:3306/pruebaFechasProg", "root", "");
+        stmt = c.createStatement();
+        stmt.execute("create table if not exists fechas(fecha date)");
     }
 
-    public ArrayList<String> actualizarDatos() {
+    public ArrayList<String> actualizarDatos() throws SQLException {
         ArrayList<String> arrayList = new ArrayList<>();
         Connection c;
-        try {
             c = DriverManager.getConnection("jdbc:mariadb://localhost:3306/pruebaFechasProg", "root", "");
             Statement st = c.createStatement();
             st.executeQuery("select * from fechas");
@@ -50,9 +51,20 @@ public class BaseDatos {
                 String fecha = String.valueOf(rs.getDate(1));
                 arrayList.add(fecha);
             }
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        return arrayList;
+    }
+    public ArrayList<String> ordenarDatos(String campo) throws SQLException {
+        ArrayList<String> arrayList = new ArrayList<>();
+        Connection c;
+        c = DriverManager.getConnection("jdbc:mariadb://localhost:3306/pruebaFechasProg", "root", "");
+        Statement st = c.createStatement();
+        if (campo.equals("Fecha"))
+            st.executeQuery("select * from fechas order by Fecha" );
+        ResultSet rs = st.getResultSet();
+        while (rs.next()) {
+            String fecha = String.valueOf(rs.getDate(1));
+            System.out.println(fecha);
+            arrayList.add(fecha);
         }
         return arrayList;
     }
